@@ -1,0 +1,48 @@
+{
+    "name": "prithvi-container-build1",
+    "description": "build process to modify the AWS SageMaker Deep Learning Container to include HLS/Prithvi",
+    "source": {
+      "type": "S3",
+      "location": "customsagemakercontainer-codebuildsource-94f3b7aa9f/prithvi_container_source.zip",
+      "buildspec": "buildspec.yml",
+      "insecureSsl": false
+    },
+    "artifacts": {
+      "type": "NO_ARTIFACTS"
+    },
+    "cache": {
+      "type": "NO_CACHE"
+    },
+    "environment": {
+      "type": "LINUX_GPU_CONTAINER",
+      "image": "aws/codebuild/amazonlinux2-x86_64-standard:5.0",
+      "computeType": "BUILD_GENERAL1_SMALL",
+      "environmentVariables": [
+        {
+          "name": "REPOSITORY_URI_AWSDL",
+          "value": "763104351884.dkr.ecr.us-east-1.amazonaws.com",
+          "type": "PLAINTEXT"
+        },
+        {
+          "name": "AWS_REGION",
+          "value": "us-east-1",
+          "type": "PLAINTEXT"
+        },
+        {
+            "name": "REPOSITORY_URI",
+            "value": "478242907172.dkr.ecr.us-east-1.amazonaws.com/prithvi1",
+            "type": "PLAINTEXT"
+          }
+      ],
+      "imagePullCredentialsType": "CODEBUILD",
+      "privilegedMode": true
+    },
+    "serviceRole": "arn:aws:iam::478242907172:role/CodeBuildServiceRole",
+    "timeoutInMinutes": 60,
+    "queuedTimeoutInMinutes": 480,
+    "logsConfig": {
+      "cloudWatchLogs": {
+        "status": "ENABLED"
+      }
+  }
+}
