@@ -17,9 +17,10 @@ To run a custom model that needs unique packages as an Amazon SageMaker Endpoint
 
 1. If your model requires additional packages or package versions unavailable from SageMaker’s managed container images you will need to extend one of the container images. 
     * For this blog ``` 763104351884.dkr.ecr.us-east-1.amazonaws.com/pytorch-training:1.13.1-gpu-py39-cu117-ubuntu20.04-sagemaker``` was used
-    * 
+    * You will need to create a Dockerfile for your new container like the one in the repository
 2. Write a python model definition using SageMaker’s inference.py file format. Look at the inference.py file here for reference
 3. Define your model artifacts and inference file within a specific file structure, archive your model files as a tar.gz, and upload your files to Amazon Simple Storage Service (S3)
+
 File Structure:
 ```
 ./
@@ -30,8 +31,12 @@ model.config
 weights.pth
 other_model_data...
 ```
+
 Tar Command:
-``` tar -czvf model.tar.gz ./ ```
+``` 
+tar -czvf model.tar.gz ./ 
+```
+
 Create the S3 Bucket and upload the tar
 ```
 # generate a unique postfix 
@@ -47,12 +52,6 @@ aws s3 mb s3://mybucket-${BUCKET_POSTFIX}
 aws s3 cp model.tar.gz s3://mybucket-${BUCKET_POSTFIX}/model.tar.gz 
 ```
 4. With your model code and an extended SageMaker container you will use SageMaker Studio to create a model, endpoint configuration, and endpoint. 
-5. Call the inference endpoint to ensure your model is running correctly
-
-3. Define your model artifacts and inference file within a specific file structure, archive your model files as a tar.gz, and upload your files to Amazon Simple Storage Service (S3)
-
-4.  With your model code and an extended SageMaker container you will use SageMaker Studio to create a model, endpoint configuration, and endpoint. 
-
 5. Call the inference endpoint to ensure your model is running correctly
 
 ## Querying the Endpoint
@@ -77,6 +76,10 @@ To clean up the resources from this blog and avoid incurring costs follow these 
 3. Delete the model.tar.gz in the S3 bucket that was created.
 4. Delete the S3 bucket.
 
+## Additional Notes:
+1. The model information is in model, but this model information exists without the actual .pt checkpoint files, which will need to be included
+2. local_test.py is a simple file to test your endpoint in local mode, which can be helpful if you hit an error deploying the endpoint
+3. All the other files are files which can help through the blog process in building your model using CodeBuild (codebuild-project.json, prithvi_container-source.zip, etc), which is not a requirement
 
 ## Support
 For any questions reach out to riaidan@amazon.com
@@ -86,3 +89,4 @@ Thank to the whole team (Aidan Ricci, Charlotte Fondren, Nate Haynes)
 
 ## License
 MIT No Attribution
+
