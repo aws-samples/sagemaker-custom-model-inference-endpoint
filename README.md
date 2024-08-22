@@ -15,16 +15,39 @@ You need the following prerequisites before you can proceed. For this post, we u
 ## Solution Overview
 To run a custom model that needs unique packages as an Amazon SageMaker Endpoint you will need to follow these steps:
 
-1. If your model requires additional packages or package versions unavailable from SageMaker’s managed container images you will need to extend one of the container images.
-2. Write a python model definition using SageMaker’s inference.py file format. 
+1. If your model requires additional packages or package versions unavailable from SageMaker’s managed container images you will need to extend one of the container images. 
+    * For this blog ``` 763104351884.dkr.ecr.us-east-1.amazonaws.com/pytorch-training:1.13.1-gpu-py39-cu117-ubuntu20.04-sagemaker``` was used
+    * 
+2. Write a python model definition using SageMaker’s inference.py file format. Look at the inference.py file here for reference
 3. Define your model artifacts and inference file within a specific file structure, archive your model files as a tar.gz, and upload your files to Amazon Simple Storage Service (S3)
+File Structure:
+```
+./
+- code
+-- inference.py
+-- requirements.txt
+model.config
+weights.pth
+other_model_data...
+```
+Tar Command:
+``` tar -czvf model.tar.gz ./ ```
+Create the S3 Bucket and upload the tar
+```
+# generate a unique postfix 
+
+BUCKET_POSTFIX=$(uuidgen --random | cut -d'-' -f1)
+echo "export BUCKET_POSTFIX=${BUCKET_POSTFIX}" >> ~/.bashrc 
+echo "Your bucket name will be mybucket-${BUCKET_POSTFIX}" 
+
+#make your bucket
+aws s3 mb s3://mybucket-${BUCKET_POSTFIX}
+
+# upload to your bucket 
+aws s3 cp model.tar.gz s3://mybucket-${BUCKET_POSTFIX}/model.tar.gz 
+```
 4. With your model code and an extended SageMaker container you will use SageMaker Studio to create a model, endpoint configuration, and endpoint. 
 5. Call the inference endpoint to ensure your model is running correctly
-
-## Procedure
-1. Extending a SageMaker container image for your model
-
-2. Write a python model definition using SageMaker’s inference.py file format. 
 
 3. Define your model artifacts and inference file within a specific file structure, archive your model files as a tar.gz, and upload your files to Amazon Simple Storage Service (S3)
 
@@ -63,15 +86,3 @@ Thank to the whole team (Aidan Ricci, Charlotte Fondren, Nate Haynes)
 
 ## License
 MIT No Attribution
-
-## Add your files
-
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line) or push an existing Git repository with the following command:
-
-```
-cd existing_repo
-git remote add origin https://gitlab.aws.dev/wwps_slg_edu_cop_highered_data/sagemaker-endpoints-blog.git
-git branch -M main
-git push -uf origin main
-```
